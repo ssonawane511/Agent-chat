@@ -39,8 +39,12 @@
     "storybook:android": "sb-rn-get-stories && STORYBOOK_ENABLED=true expo start --android",
     "storybook-generate": "sb-rn-get-stories",
     "reset-project": "node ./scripts/reset-project.js",
+    "prebuild": "expo prebuild",
+    "prebuild:clean": "expo prebuild --clean",
     "android": "expo run:android",
+    "android:release": "expo run:android --variant release",
     "ios": "expo run:ios",
+    "ios:release": "expo run:ios --configuration Release",
     "web": "expo start --web",
     "lint": "expo lint"
   },

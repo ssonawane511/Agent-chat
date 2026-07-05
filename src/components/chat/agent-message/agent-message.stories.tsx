@@ -38,7 +38,15 @@ export const Designer: Story = {
 export const WriterWithQuote: Story = {
   args: {
     agentId: "writer",
-    text: "“Great copy starts with empathy.”\n\nWant me to draft a headline?",
+    text: "**Positioning:** For product teams who ship under pressure.\n\nWant me to draft a headline?",
     index: 2,
+  },
+};
+
+export const WithMarkdown: Story = {
+  args: {
+    agentId: "strategist",
+    text: "**Week 1 checklist:**\n\n- Finalize ICP doc\n- Lock hero tagline\n- Set up waitlist with UTM tracking\n\nDon't build more features unless they block the demo.",
+    index: 3,
   },
 };

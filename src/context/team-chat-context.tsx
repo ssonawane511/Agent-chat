@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { longChatMessages } from "../components/chat/chat-thread/chat-thread.fixtures";
 import { AGENT_LIST } from "../constants/agents";
 import type { AgentId, ChatSession, Message } from "../types/chat";
 
@@ -22,6 +23,16 @@ function createEmptySession(): ChatSession {
     title: "New chat",
     messages: [],
     updatedAt: Date.now(),
+  };
+}
+
+function createDemoLongChatSession(): ChatSession {
+  return {
+    id: "demo-long-chat",
+    title: titleFromMessages(longChatMessages, "GTM launch plan"),
+    messages: longChatMessages,
+    updatedAt: Date.now(),
+    starred: true,
   };
 }
 
@@ -58,14 +69,30 @@ type TeamChatContextValue = {
 const TeamChatContext = createContext<TeamChatContextValue | null>(null);
 
 export function TeamChatProvider({ children }: { children: ReactNode }) {
-  const initialSessionRef = useRef<ChatSession | null>(null);
-  if (initialSessionRef.current === null) {
-    initialSessionRef.current = createEmptySession();
+  const initialStateRef = useRef<{
+    sessions: ChatSession[];
+    activeSessionId: string;
+  } | null>(null);
+  if (initialStateRef.current === null) {
+    const emptySession = createEmptySession();
+    if (__DEV__) {
+      const demoSession = createDemoLongChatSession();
+      initialStateRef.current = {
+        sessions: [emptySession, demoSession],
+        activeSessionId: demoSession.id,
+      };
+    } else {
+      initialStateRef.current = {
+        sessions: [emptySession],
+        activeSessionId: emptySession.id,
+      };
+    }
   }
-  const initialSession = initialSessionRef.current;
+  const { sessions: initialSessions, activeSessionId: initialActiveSessionId } =
+    initialStateRef.current;
 
-  const [sessions, setSessions] = useState<ChatSession[]>(() => [initialSession]);
-  const [activeSessionId, setActiveSessionId] = useState(initialSession.id);
+  const [sessions, setSessions] = useState<ChatSession[]>(() => initialSessions);
+  const [activeSessionId, setActiveSessionId] = useState(initialActiveSessionId);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isAgentSheetOpen, setIsAgentSheetOpen] = useState(false);
   const [activeAgents, setActiveAgents] = useState<AgentId[]>(ALL_AGENT_IDS);

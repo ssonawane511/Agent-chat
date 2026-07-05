@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
 import type { Message } from "../../../types/chat";
 import {
   ChatThread,
   ChatThreadBottomOffsetProvider,
 } from "./chat-thread";
+import { longChatMessages } from "./chat-thread.fixtures";
 
 const sampleMessages: Message[] = [
   {
@@ -36,9 +38,11 @@ const meta = {
   component: ChatThread,
   decorators: [
     (Story) => (
-      <ChatThreadBottomOffsetProvider value={120}>
-        <Story />
-      </ChatThreadBottomOffsetProvider>
+      <View style={{ flex: 1 }}>
+        <ChatThreadBottomOffsetProvider value={120}>
+          <Story />
+        </ChatThreadBottomOffsetProvider>
+      </View>
     ),
   ],
 } satisfies Meta<typeof ChatThread>;
@@ -48,19 +52,25 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Conversation: Story = {
-  render: () => <ChatThread messages={sampleMessages} />,
+  args: {
+    messages: sampleMessages,
+  },
 };
 
 export const SingleMessage: Story = {
-  render: () => (
-    <ChatThread
-      messages={[
-        {
-          id: "1",
-          role: "user",
-          text: "Quick question about our launch timeline.",
-        },
-      ]}
-    />
-  ),
+  args: {
+    messages: [
+      {
+        id: "1",
+        role: "user",
+        text: "Quick question about our launch timeline.",
+      },
+    ],
+  },
+};
+
+export const LongConversation: Story = {
+  args: {
+    messages: longChatMessages,
+  },
 };

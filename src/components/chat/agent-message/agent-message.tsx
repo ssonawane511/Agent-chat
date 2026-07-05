@@ -1,7 +1,8 @@
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { Text, useWindowDimensions, View } from "react-native";
+import { useWindowDimensions } from "react-native";
 
 import type { AgentId } from "../../../types/chat";
+import { MarkdownDocument } from "../final-plan-message/components/markdown-document";
 import { AgentBadge, getAgentColor } from "../agent-badge";
 
 import { styles } from "./agent-message.styles";
@@ -11,22 +12,6 @@ type AgentMessageProps = {
   text: string;
   index: number;
 };
-
-function WriterMessageBody({ text }: { text: string }) {
-  const accent = getAgentColor("writer");
-  const parts = text.split("\n\n");
-  const quote = parts[0] ?? text;
-  const followUp = parts[1];
-
-  return (
-    <View style={[styles.blockquote, { borderLeftColor: accent }]}>
-      <Text style={styles.quoteText}>{quote}</Text>
-      {followUp ? (
-        <Text style={[styles.followUp, { color: accent }]}>{followUp}</Text>
-      ) : null}
-    </View>
-  );
-}
 
 export function AgentMessageBubble({
   agentId,
@@ -44,11 +29,12 @@ export function AgentMessageBubble({
       accessibilityLabel={`Agent message: ${text}`}
     >
       <AgentBadge agentId={agentId} />
-      {agentId === "writer" ? (
-        <WriterMessageBody text={text} />
-      ) : (
-        <Text style={styles.text}>{text}</Text>
-      )}
+      <MarkdownDocument
+        markdown={text}
+        embedded
+        accentColor={getAgentColor(agentId)}
+        style={styles.markdown}
+      />
     </Animated.View>
   );
 }
