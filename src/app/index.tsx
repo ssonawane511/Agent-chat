@@ -117,40 +117,41 @@ export default function Index() {
           ]}
         >
         <ScreenBackground>
-          <View style={[styles.flex, { paddingTop: insets.top }]}>
-            <Pressable
-              style={styles.flex}
-              onPress={Keyboard.dismiss}
-              accessible={false}
-            >
-              <AppHeader onOpenHistory={openHistory} onNewChat={startNewChat} />
+          <View style={[styles.screen, { paddingTop: insets.top }]}>
+            <AppHeader onOpenHistory={openHistory} onNewChat={startNewChat} />
 
-              {__DEV__ ? (
-                <Link href="/storybook" style={styles.storybookLink}>
-                  <Text style={styles.storybookLinkText}>Storybook</Text>
-                </Link>
-              ) : null}
+            {__DEV__ ? (
+              <Link href="/storybook" style={styles.storybookLink}>
+                <Text style={styles.storybookLinkText}>Storybook</Text>
+              </Link>
+            ) : null}
 
-              <View style={styles.content}>
+            <View style={[styles.content, { paddingBottom: inputDockHeight }]}>
               {isEmpty ? (
-                <Animated.View
-                  key="hero"
-                  entering={FadeIn.duration(260)}
-                  exiting={FadeOutLeft.duration(220)}
+                <Pressable
                   style={styles.flex}
+                  onPress={Keyboard.dismiss}
+                  accessible={false}
                 >
-                  <View style={[styles.flex, styles.heroContent]}>
-                    {!hideEmptyChatChrome ? (
-                      <Animated.View
-                        entering={FadeIn.duration(180)}
-                        exiting={FadeOut.duration(140)}
-                        style={styles.heroWrap}
-                      >
-                        <HeroPrompt />
-                      </Animated.View>
-                    ) : null}
-                  </View>
-                </Animated.View>
+                  <Animated.View
+                    key="hero"
+                    entering={FadeIn.duration(260)}
+                    exiting={FadeOutLeft.duration(220)}
+                    style={styles.flex}
+                  >
+                    <View style={[styles.flex, styles.heroContent]}>
+                      {!hideEmptyChatChrome ? (
+                        <Animated.View
+                          entering={FadeIn.duration(180)}
+                          exiting={FadeOut.duration(140)}
+                          style={styles.heroWrap}
+                        >
+                          <HeroPrompt />
+                        </Animated.View>
+                      ) : null}
+                    </View>
+                  </Animated.View>
+                </Pressable>
               ) : (
                 <Animated.View
                   key="chat"
@@ -162,26 +163,24 @@ export default function Index() {
                   </ChatThreadBottomOffsetProvider>
                 </Animated.View>
               )}
-              </View>
-            </Pressable>
+            </View>
 
-            <KeyboardStickyView>
+            <KeyboardStickyView style={styles.inputDockSticky}>
               <View
+                onLayout={handleInputDockLayout}
                 style={{
                   paddingBottom: isKeyboardVisible ? 0 : insets.bottom,
                 }}
               >
-                <View onLayout={handleInputDockLayout}>
-                  <InputDock
-                    value={inputText}
-                    onChangeText={setInputText}
-                    onSubmit={sendMessage}
-                    activeAgents={activeAgents}
-                    onOpenAgentSheet={openAgentSheet}
-                    onStartVoiceInput={handleStartVoiceInput}
-                    onStopVoiceInput={handleStopVoiceInput}
-                  />
-                </View>
+                <InputDock
+                  value={inputText}
+                  onChangeText={setInputText}
+                  onSubmit={sendMessage}
+                  activeAgents={activeAgents}
+                  onOpenAgentSheet={openAgentSheet}
+                  onStartVoiceInput={handleStartVoiceInput}
+                  onStopVoiceInput={handleStopVoiceInput}
+                />
               </View>
             </KeyboardStickyView>
           </View>
@@ -230,14 +229,27 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  screen: {
+    flex: 1,
+    position: "relative",
+  },
   content: {
     flex: 1,
+  },
+  inputDockSticky: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   heroContent: {
     justifyContent: "center",
   },
   heroWrap: {
+    flex: 1,
     width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   storybookLink: {
     alignSelf: "flex-end",

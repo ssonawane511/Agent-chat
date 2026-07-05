@@ -4,6 +4,7 @@ import {
   type KeyboardAwareScrollViewRef,
 } from "react-native-keyboard-controller";
 
+import { spacing } from "../../../constants/tokens";
 import type { Message } from "../../../types/chat";
 import { AgentMessageBubble } from "../agent-message";
 import { UserMessageBubble } from "../user-message";
@@ -42,10 +43,14 @@ export function ChatThread({ messages }: ChatThreadProps) {
     <KeyboardAwareScrollView
       ref={scrollRef}
       style={styles.scroll}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: spacing.xxl + bottomOffset },
+      ]}
       bottomOffset={bottomOffset}
-      keyboardShouldPersistTaps="never"
+      keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
+      nestedScrollEnabled
       showsVerticalScrollIndicator={false}
       accessibilityLabel="Chat messages"
       accessibilityRole="list"
