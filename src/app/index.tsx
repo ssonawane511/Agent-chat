@@ -4,9 +4,11 @@ import {
   LayoutChangeEvent,
   Pressable,
   StyleSheet,
+  Text,
   View,
   useWindowDimensions,
 } from "react-native";
+import { Link } from "expo-router";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   FadeIn,
@@ -123,6 +125,12 @@ export default function Index() {
             >
               <AppHeader onOpenHistory={openHistory} onNewChat={startNewChat} />
 
+              {__DEV__ ? (
+                <Link href="/storybook" style={styles.storybookLink}>
+                  <Text style={styles.storybookLinkText}>Storybook</Text>
+                </Link>
+              ) : null}
+
               <View style={styles.content}>
               {isEmpty ? (
                 <Animated.View
@@ -230,5 +238,19 @@ const styles = StyleSheet.create({
   },
   heroWrap: {
     width: "100%",
+  },
+  storybookLink: {
+    alignSelf: "flex-end",
+    marginRight: 16,
+    marginBottom: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: colors.brandPurpleLight,
+  },
+  storybookLinkText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.brandPurpleText,
   },
 });
