@@ -8,6 +8,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   bubble: {
+    maxWidth: "70%",
     backgroundColor: colors.userBubble,
     borderRadius: radius.xl,
     paddingHorizontal: spacing.lg,

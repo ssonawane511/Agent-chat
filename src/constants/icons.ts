@@ -69,4 +69,8 @@ export const ICONS = {
     ios: "checkmark",
     android: require("@expo/material-symbols/check.xml"),
   }),
+  moreHorizontal: Icon.select({
+    ios: "ellipsis",
+    android: require("@expo/material-symbols/more_horiz.xml"),
+  }),
 } as const;
