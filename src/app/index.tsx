@@ -1,98 +1,234 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useState } from "react";
+import {
+  Keyboard,
+  LayoutChangeEvent,
+  Pressable,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  FadeIn,
+  FadeInRight,
+  FadeOut,
+  FadeOutLeft,
+} from "react-native-reanimated";
+import {
+  KeyboardStickyView,
+  useKeyboardState,
+} from "react-native-keyboard-controller";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { AppHeader } from "../components/chat/app-header";
+import { AgentSelectorSheet } from "../components/chat/agent-selector-sheet";
+import { ChatHistoryDrawer } from "../components/chat/chat-history-drawer/chat-history-drawer";
+import { getDrawerWidth, PUSH_DRAWER_INSETS } from "../components/chat/chat-history-drawer/chat-history-drawer.utils";
+import {
+  ChatThread,
+  ChatThreadBottomOffsetProvider,
+} from "../components/chat/chat-thread/chat-thread";
+import { HeroPrompt } from "../components/chat/hero-prompt";
+import { InputDock } from "../components/chat/input-dock";
+import { ScreenBackground } from "../components/chat/screen-background";
+import { usePushDrawer } from "../hooks/use-push-drawer";
+import { useTeamChat } from "../hooks/use-team-chat";
+import { colors, radius, shadowMd } from "../constants/tokens";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+const DEFAULT_INPUT_DOCK_HEIGHT = 120;
+
+export default function Index() {
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const drawerWidth = getDrawerWidth(width);
+  const isKeyboardVisible = useKeyboardState((state) => state.isVisible);
+  const [inputDockHeight, setInputDockHeight] = useState(DEFAULT_INPUT_DOCK_HEIGHT);
+
+  const {
+    messages,
+    inputText,
+    setInputText,
+    isEmpty,
+    activeSessionId,
+    activeAgents,
+    previousChats,
+    isHistoryOpen,
+    isAgentSheetOpen,
+    openHistory,
+    closeHistory,
+    openAgentSheet,
+    closeAgentSheet,
+    toggleAllAgents,
+    toggleAgent,
+    loadChat,
+    startNewChat,
+    sendMessage,
+  } = useTeamChat();
+
+  const handleHistoryOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        openHistory();
+      } else {
+        closeHistory();
+      }
+    },
+    [closeHistory, openHistory],
   );
-}
 
-export default function HomeScreen() {
+  const { contentStyle, panGesture } = usePushDrawer({
+    open: isHistoryOpen,
+    offset: drawerWidth,
+    onOpenChange: handleHistoryOpenChange,
+    enabled: !isAgentSheetOpen,
+    verticalInset: PUSH_DRAWER_INSETS.vertical,
+    horizontalInset: PUSH_DRAWER_INSETS.horizontal,
+    borderRadius: radius.xl,
+  });
+
+  const hideEmptyChatChrome = isEmpty && isKeyboardVisible;
+
+  const scrollBottomOffset = inputDockHeight;
+
+  const handleInputDockLayout = useCallback((event: LayoutChangeEvent) => {
+    setInputDockHeight(event.nativeEvent.layout.height);
+  }, []);
+
+  const handleStartVoiceInput = useCallback(() => {}, []);
+
+  const handleStopVoiceInput = useCallback(() => {}, []);
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <View style={styles.rootShell}>
+      <ChatHistoryDrawer
+        sessions={previousChats}
+        activeSessionId={activeSessionId}
+        onSelectChat={loadChat}
+      />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[
+            styles.mainLayer,
+            isHistoryOpen && styles.mainLayerPushed,
+            contentStyle,
+          ]}
+        >
+        <ScreenBackground>
+          <View style={[styles.flex, { paddingTop: insets.top }]}>
+            <Pressable
+              style={styles.flex}
+              onPress={Keyboard.dismiss}
+              accessible={false}
+            >
+              <AppHeader onOpenHistory={openHistory} onNewChat={startNewChat} />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+              <View style={styles.content}>
+              {isEmpty ? (
+                <Animated.View
+                  key="hero"
+                  entering={FadeIn.duration(260)}
+                  exiting={FadeOutLeft.duration(220)}
+                  style={styles.flex}
+                >
+                  <View style={[styles.flex, styles.heroContent]}>
+                    {!hideEmptyChatChrome ? (
+                      <Animated.View
+                        entering={FadeIn.duration(180)}
+                        exiting={FadeOut.duration(140)}
+                        style={styles.heroWrap}
+                      >
+                        <HeroPrompt />
+                      </Animated.View>
+                    ) : null}
+                  </View>
+                </Animated.View>
+              ) : (
+                <Animated.View
+                  key="chat"
+                  entering={FadeInRight.duration(280)}
+                  style={styles.flex}
+                >
+                  <ChatThreadBottomOffsetProvider value={scrollBottomOffset}>
+                    <ChatThread messages={messages} />
+                  </ChatThreadBottomOffsetProvider>
+                </Animated.View>
+              )}
+              </View>
+            </Pressable>
+
+            <KeyboardStickyView>
+              <View
+                style={{
+                  paddingBottom: isKeyboardVisible ? 0 : insets.bottom,
+                }}
+              >
+                <View onLayout={handleInputDockLayout}>
+                  <InputDock
+                    value={inputText}
+                    onChangeText={setInputText}
+                    onSubmit={sendMessage}
+                    activeAgents={activeAgents}
+                    onOpenAgentSheet={openAgentSheet}
+                    onStartVoiceInput={handleStartVoiceInput}
+                    onStopVoiceInput={handleStopVoiceInput}
+                  />
+                </View>
+              </View>
+            </KeyboardStickyView>
+          </View>
+        </ScreenBackground>
+
+        {isHistoryOpen ? (
+          <View
+            style={styles.mainLayerDismiss}
+            accessibilityRole="button"
+            accessibilityLabel="Close chat history"
+            importantForAccessibility="yes"
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        ) : null}
+        </Animated.View>
+      </GestureDetector>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <AgentSelectorSheet
+        visible={isAgentSheetOpen}
+        activeAgents={activeAgents}
+        onClose={closeAgentSheet}
+        onToggleAll={toggleAllAgents}
+        onToggleAgent={toggleAgent}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  rootShell: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    overflow: "hidden",
+    backgroundColor: colors.surface0,
   },
-  safeArea: {
+  mainLayer: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    width: "100%",
+    overflow: "hidden",
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  mainLayerPushed: {
+    ...shadowMd(),
+  },
+  mainLayerDismiss: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 10,
+  },
+  flex: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
   },
-  title: {
-    textAlign: 'center',
+  content: {
+    flex: 1,
   },
-  code: {
-    textTransform: 'uppercase',
+  heroContent: {
+    justifyContent: "center",
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  heroWrap: {
+    width: "100%",
   },
 });
