@@ -23,7 +23,8 @@
       "package": "com.ssonawane511.commercial"
     },
     "web": {
-      "output": "static",
+      "bundler": "metro",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [

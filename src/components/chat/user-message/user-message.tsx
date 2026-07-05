@@ -1,5 +1,5 @@
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { View, Text, useWindowDimensions } from "react-native";
+import { View, Text } from "react-native";
 
 import { styles } from "./user-message.styles";
 
@@ -8,18 +8,15 @@ type UserMessageProps = {
   index: number;
 };
 
-export function UserMessageBubble({ text, index }: UserMessageProps) {
-  const { width } = useWindowDimensions();
-  const maxWidth = width * 0.78;
-
+export function UserMessageBubble({ text }: UserMessageProps) {
   return (
     <Animated.View
-      entering={FadeInUp.delay(index * 80).duration(200)}
+      entering={FadeInUp.duration(200)}
       style={styles.wrapper}
       accessibilityRole="text"
       accessibilityLabel={`You said: ${text}`}
     >
-      <View style={[styles.bubble, { maxWidth }]}>
+      <View style={styles.bubble}>
         <Text style={styles.text}>{text}</Text>
       </View>
     </Animated.View>

@@ -16,14 +16,13 @@ type AgentMessageProps = {
 export function AgentMessageBubble({
   agentId,
   text,
-  index,
 }: AgentMessageProps) {
   const { width } = useWindowDimensions();
   const maxWidth = width * 0.88;
 
   return (
     <Animated.View
-      entering={FadeInUp.delay(index * 80).duration(200)}
+      entering={FadeInUp.duration(200)}
       style={[styles.wrapper, { maxWidth }]}
       accessibilityRole="text"
       accessibilityLabel={`Agent message: ${text}`}
