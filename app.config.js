@@ -12,11 +12,8 @@ module.exports = () => {
     },
   };
 
-  if (process.env.PLATFORM === "web") {
-    const baseUrl = process.env.EXPO_BASE_URL ?? "/";
-    if (baseUrl !== "/") {
-      config.expo.experiments.baseUrl = baseUrl;
-    }
+  if (process.env.PLATFORM === "web" && process.env.EXPO_BASE_URL) {
+    config.expo.experiments.baseUrl = process.env.EXPO_BASE_URL;
   }
 
   return config;

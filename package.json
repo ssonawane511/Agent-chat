@@ -48,6 +48,7 @@
     "ios:release": "expo run:ios --configuration Release",
     "web": "expo start --web",
     "build:web": "PLATFORM=web expo export -p web",
+    "build:web:pages": "PLATFORM=web EXPO_BASE_URL=/Agent-chat expo export -p web",
     "lint": "expo lint"
   },
   "private": true

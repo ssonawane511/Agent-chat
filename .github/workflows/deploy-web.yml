@@ -34,6 +34,7 @@ jobs:
       - name: Build web app
         env:
           PLATFORM: web
+          EXPO_BASE_URL: /${{ github.event.repository.name }}
         run: npm run build:web
 
       - name: Add SPA fallback for client-side routing
